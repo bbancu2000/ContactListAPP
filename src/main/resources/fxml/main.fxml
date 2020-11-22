@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<HBox minHeight="50.0" minWidth="400.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ro.jademy.javafx.demo.controller.MainController">
+
+    <children>
+        <VBox maxWidth="1.7976931348623157E308" minHeight="250.0" minWidth="250.0" prefHeight="354.0" prefWidth="300.0" HBox.hgrow="ALWAYS">
+            <children>
+                <TextField fx:id="searchTextField">
+                    <VBox.margin>
+                        <Insets />
+                    </VBox.margin>
+                </TextField>
+                <TableView fx:id="contactsTable" editable="true" prefHeight="162.0" prefWidth="280.0" VBox.vgrow="ALWAYS">
+
+                    <VBox.margin>
+                        <Insets top="5.0" />
+                    </VBox.margin>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
+                </TableView>
+            <HBox alignment="CENTER" prefHeight="28.0" prefWidth="235.0">
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+               <children>
+                  <ToggleButton fx:id="addButton" layoutX="103.0" layoutY="11.0" mnemonicParsing="false" text="ADD">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </ToggleButton>
+                  <ToggleButton fx:id="editButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" text="EDIT">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </ToggleButton>
+                  <ToggleButton fx:id="deleteButton" layoutX="51.0" layoutY="10.0" mnemonicParsing="false" text="DELETE" />
+               </children>
+            </HBox>
+            <Button fx:id="saveButton" alignment="CENTER" mnemonicParsing="false" text="SAVE">
+               <VBox.margin>
+                  <Insets left="10.0" top="10.0" />
+               </VBox.margin>
+            </Button>
+            </children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
+        </VBox>
+      <VBox minWidth="300.0" prefHeight="400.0" prefWidth="442.0">
+         <children>
+            <Label text="First Name">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </VBox.margin></Label>
+            <TextField fx:id="firstNameTextField" />
+            <Label text="Last Name">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </VBox.margin></Label>
+            <TextField fx:id="lastNameTextField" />
+            <HBox prefHeight="35.0" prefWidth="382.0">
+               <children>
+                  <Label prefHeight="30.0" prefWidth="140.0" text="Phone Numbers">
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </HBox.margin>
+                  </Label>
+                  <Button fx:id="addPhoneButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="+">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" top="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="deletePhoneButton" minHeight="30.0" minWidth="30.0" mnemonicParsing="false" text="-">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <TextField fx:id="addPhoneTextField" prefHeight="30.0" prefWidth="201.0" promptText="Insert Number Here...     (&gt;0)" visible="false" HBox.hgrow="ALWAYS">
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" top="5.0" />
+                     </HBox.margin></TextField>
+               </children>
+            </HBox>
+            <ListView fx:id="phoneListView" prefHeight="200.0" prefWidth="200.0" />
+            <HBox alignment="CENTER" fillHeight="false" prefHeight="25.0" prefWidth="382.0">
+               <children>
+                  <Button fx:id="confirmAddButton" mnemonicParsing="false" text="Confirm ADD" visible="false">
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </HBox.margin></Button>
+                  <Button fx:id="confirmEditButton" mnemonicParsing="false" text="Confirm EDIT" visible="false">
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </HBox.margin></Button>
+                  <Button fx:id="confirmDeleteButton" mnemonicParsing="false" text="Confirm DELETE" visible="false">
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </HBox.margin></Button>
+               </children>
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding></VBox>
+    </children>
+</HBox>
