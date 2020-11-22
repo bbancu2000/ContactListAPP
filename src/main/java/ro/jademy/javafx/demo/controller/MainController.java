@@ -42,37 +42,31 @@ public class MainController {
 
     @FXML
     TableView<Contact> contactsTable;
-
-
     @FXML
     TextField searchTextField;
+
     @FXML
     TextField addPhoneTextField;
     @FXML
     TextField firstNameTextField;
     @FXML
     TextField lastNameTextField;
-
     @FXML
     ListView<String> phoneListView;
 
-    List<String> tempPhoneList = new ArrayList<>();
 
 
-    private ObservableList<Contact> filteredContactList = (FXCollections.observableList(new ArrayList<>()));
-    private Contact selectedContact;
-
+    /// CHOOSE DIFFERENT input files
     //  private final ObservableList<Contact> allContacts = FXCollections.observableList(SQLDatabase.getAllQuestionsFromDB());
     private final ObservableList<Contact> allContacts = FXCollections.observableList(CSVDatabase.getCSV());
+    private Contact selectedContact;
+
+    List<String> tempPhoneList = new ArrayList<>();
+    private ObservableList<Contact> filteredContactList = allContacts;
 
 
     @FXML
     private void initialize() throws IOException {
-
-
-        if (filteredContactList.isEmpty()) {
-            filteredContactList = allContacts;
-        }
         contactsTable.setEditable(true);
 
         TableColumn firstNameCol = new TableColumn("First Name");
@@ -96,7 +90,7 @@ public class MainController {
 
         // searchTextField logic
         searchTextField.setPromptText("Search here...");
-        searchTextField.setOnKeyReleased(keyEvent -> doFilterList(allContacts, searchTextField.getText()));
+        searchTextField.setOnKeyReleased(keyEvent -> doFilterList(searchTextField.getText()));
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -387,23 +381,43 @@ public class MainController {
     }
 
 
-    private void doFilterList(ObservableList<Contact> data, String searchWord) {
-        searchWord = searchWord.trim().toLowerCase();
+    private void doFilterList(String searchString) {
+        // Cleaning the word
+        searchString = searchString.trim().toLowerCase();
+        String[] searchWordSplit = searchString.split(" ");
 
-        String finalSearchWord = searchWord;
-        List<Contact> tempList = data.stream().
-                filter(d -> d.getFirstName().toLowerCase().contains(finalSearchWord)
-                        || d.getLastName().toLowerCase().contains(finalSearchWord)
-                        || d.getPhoneList().contains(finalSearchWord))
-                .distinct()
-                .collect(Collectors.toList());
+        List<Contact> tempList = new ArrayList<>();
 
-        ObservableList<Contact> tempObservableList = FXCollections.observableList(tempList);
-        filteredContactList = tempObservableList;
+        for (String word : searchWordSplit) {
+            if(!word.equals("")) {
+                if(tempList.isEmpty()) {
+                    tempList.addAll(filterAlgorithm(allContacts,word));
+                } else {
+                    tempList.retainAll(filterAlgorithm(allContacts, word));
+                }
+            }
+        }
+
+        if(tempList.isEmpty() && searchString.isEmpty()) {
+            filteredContactList = allContacts;
+        } else {
+            filteredContactList =  FXCollections.observableList(tempList);
+        }
 
         System.out.println("flcontactlist " + filteredContactList.size());
-        System.out.println("tempobservable " + tempObservableList.size());
+        // refresh
         contactsTable.setItems(filteredContactList);
+    }
+
+
+
+    private List<Contact> filterAlgorithm(List<Contact> contactList , String searchWord){
+        return contactList.stream().
+                filter(d -> d.getFirstName().toLowerCase().contains(searchWord)
+                        || d.getLastName().toLowerCase().contains(searchWord)
+                        || d.getPhoneList().contains(searchWord))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
 

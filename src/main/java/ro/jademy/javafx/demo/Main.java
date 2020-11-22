@@ -1,19 +1,12 @@
 package ro.jademy.javafx.demo;
 
 import javafx.application.Application;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-
-
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -25,20 +18,6 @@ public class Main extends Application {
         primaryStage.setMinHeight(400);
         primaryStage.setMinWidth(600);
         primaryStage.show();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     public static void main(String[] args) {
