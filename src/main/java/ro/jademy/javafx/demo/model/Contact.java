@@ -9,11 +9,9 @@ public class Contact {
     private String firstName;
     private String lastName;
     private String email;
-
-
     private List<String> phoneList;
 
-    private List<Role> roles = new ArrayList<>();
+    //private List<Role> roles = new ArrayList<>();
 
     public Contact(String firstName, String lastName, List<String> phoneList) {
         this.firstName = firstName;
@@ -29,12 +27,6 @@ public class Contact {
         phoneList = new ArrayList<>();
     }
 
-    public Contact(String firstName, String lastName, String email, List<Role> roles) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.roles = roles;
-    }
 
 
 
@@ -79,9 +71,6 @@ public class Contact {
         this.email = email;
     }
 
-    public List<Role> getRoles() {
-        return roles;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -92,12 +81,11 @@ public class Contact {
                 Objects.equals(getFirstName(), contact.getFirstName()) &&
                 Objects.equals(getLastName(), contact.getLastName()) &&
                 Objects.equals(getEmail(), contact.getEmail()) &&
-                Objects.equals(getPhoneList(), contact.getPhoneList()) &&
-                Objects.equals(getRoles(), contact.getRoles());
+                Objects.equals(getPhoneList(), contact.getPhoneList());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getFirstName(), getLastName(), getEmail(), getPhoneList(), getRoles());
+        return Objects.hash(getId(), getFirstName(), getLastName(), getEmail(), getPhoneList());
     }
 }
