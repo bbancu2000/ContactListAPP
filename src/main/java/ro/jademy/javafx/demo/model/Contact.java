@@ -1,5 +1,8 @@
 package ro.jademy.javafx.demo.model;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -10,6 +13,9 @@ public class Contact {
     private String lastName;
     private String email;
     private List<String> phoneList;
+
+
+    private BooleanProperty toBeDeleted = new SimpleBooleanProperty(false);
 
     //private List<Role> roles = new ArrayList<>();
 
@@ -24,11 +30,22 @@ public class Contact {
         this.firstName = "";
         this.lastName = "";
         this.email = "";
+        this.toBeDeleted.setValue(false);
         phoneList = new ArrayList<>();
     }
 
 
+    public boolean isToBeDeleted() {
+        return toBeDeleted.get();
+    }
 
+    public BooleanProperty toBeDeletedProperty() {
+        return toBeDeleted;
+    }
+
+    public void setToBeDeleted(boolean toBeDeleted) {
+        this.toBeDeleted.set(toBeDeleted);
+    }
 
     public long getId() {
         return id;

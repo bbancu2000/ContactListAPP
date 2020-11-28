@@ -2,10 +2,15 @@ package ro.jademy.javafx.demo.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
+
 import ro.jademy.javafx.demo.database.CSVDatabase;
 import ro.jademy.javafx.demo.model.Contact;
 
@@ -39,6 +44,9 @@ public class MainController {
     @FXML
     Button saveButton;
 
+    @FXML
+    VBox rightPanel;
+
 
     @FXML
     TableView<Contact> contactsTable;
@@ -62,38 +70,59 @@ public class MainController {
     List<String> tempPhoneList = new ArrayList<>();
     private ObservableList<Contact> filteredContactList = allContacts;
 
+    // INPUT Limiting Filter
+    int maxInputCharLimit = 40;
+    String forbiddenChars = "!@#;|,";
+
 
     @FXML
     private void initialize() throws IOException {
+        rightPanel.setVisible(false);
+
 
         // SET TABLE-VIEW
         contactsTable.setEditable(true);
 
         TableColumn firstNameCol = new TableColumn("First Name");
         firstNameCol.setMinWidth(120);
-        firstNameCol.setCellValueFactory(
-                new PropertyValueFactory<Contact, String>("firstName"));
+        firstNameCol.setCellValueFactory(new PropertyValueFactory<Contact, String>("firstName"));
 
         TableColumn lastNameCol = new TableColumn("Last Name");
         lastNameCol.setMinWidth(120);
-        lastNameCol.setCellValueFactory(
-                new PropertyValueFactory<Contact, String>("lastName"));
+        lastNameCol.setCellValueFactory(new PropertyValueFactory<Contact, String>("lastName"));
+
+        //// NEW CHECK BOX DELETE COL
+        TableColumn deleteCol = new TableColumn("Delete");
+        deleteCol.setMinWidth(50);
+        deleteCol.setCellValueFactory(new PropertyValueFactory<Contact, Boolean>("toBeDeleted"));
+
+        deleteCol.setCellFactory(cell -> new CheckBoxTableCell<>());
+        deleteCol.setVisible(false);
 
         // contactsTable logic
         contactsTable.setItems(filteredContactList);//Set the contactsTable's items using the filtered list
-        contactsTable.getColumns().addAll(firstNameCol, lastNameCol);
+        contactsTable.getColumns().addAll(firstNameCol, lastNameCol, deleteCol);
         contactsTable.setOnMouseClicked(e -> {
             setSelectedContact();
-            addPhoneTextField.setVisible(false);
-            confirmAddButton.setVisible(false);
         });
+
 
         // searchTextField logic
         searchTextField.setPromptText("Search here...");
         searchTextField.setOnKeyReleased(keyEvent -> doFilterList(searchTextField.getText()));
         phoneListView.setCellFactory(TextFieldListCell.forListView());
 
-//////////////////////////////////////////////////////////////////////////////
+
+        // LIMITING INPUT
+        firstNameTextField.setOnKeyTyped(limitMaxInput(firstNameTextField, maxInputCharLimit, forbiddenChars));
+        lastNameTextField.setOnKeyTyped(limitMaxInput(lastNameTextField, maxInputCharLimit, forbiddenChars));
+        addPhoneTextField.setOnKeyTyped(limitMaxInput(addPhoneTextField, maxInputCharLimit, forbiddenChars));
+        searchTextField.setOnKeyTyped(limitMaxInput(searchTextField, maxInputCharLimit, forbiddenChars));
+
+
+//////////////////////////////////////////////////////////////////////////////////
+        /*             HANDLERS for BUTTONS
+         *///////////////////////////////////////////////////////////////////////
 
         saveButton.setOnAction(actionEvent -> {
             usedSaveButton(allContacts);
@@ -115,10 +144,10 @@ public class MainController {
             usedConfirmEditButton();
         });
 
-
-        deleteButton.setOnAction(event -> {
-            usedDeleteButton();
+        deleteButton.setOnMouseClicked(event -> {
+            usedDeleteButton(deleteCol);
         });
+
 
         confirmDeleteButton.setOnAction(actionEvent -> {
             usedConfirmDeleteButton();
@@ -127,7 +156,12 @@ public class MainController {
 
         ///// PHONE ADD DELETE
         addPhoneButton.setOnAction(actionEvent -> {
-            addPhoneTextField.setVisible(true);
+            if (addButton.isSelected()
+                    || editButton.isSelected()
+                    || selectedContact != null) {
+                addPhoneTextField.setVisible(true);
+            }
+
         });
         deletePhoneButton.setOnAction(actionEvent -> {
             usedDeletePhoneButton();
@@ -136,8 +170,10 @@ public class MainController {
             usedAddPhoneTextField();
         });
 
-
     }
+
+    /////////////////////////////////////////////////////////////////////////////////
+
 
     private void usedSaveButton(List<Contact> allContacts) {
         // TODO save to DB eventually ?
@@ -146,13 +182,11 @@ public class MainController {
     }
 
     private void usedAddPhoneTextField() {
-        System.out.println("usedAddPhoneTextField-method");
         String newNumber = addPhoneTextField.getText();
 
         if (newNumber.length() > 0) {
             if (selectedContact != null) {
-                selectedContact.getPhoneList().add(newNumber);
-                phoneListView.setItems(FXCollections.observableList(selectedContact.getPhoneList()));
+                phoneListView.getItems().add(newNumber);
             } else if (addButton.isSelected()) {
                 tempPhoneList.add(newNumber);
                 phoneListView.setItems(FXCollections.observableList(tempPhoneList));
@@ -177,8 +211,8 @@ public class MainController {
 
 
     private void usedAddButton() {
+        rightPanel.setVisible(true);
         if (addButton.isSelected()) {
-            System.out.println("selectedContact set to null");
             selectedContact = null;
 
             // LOGIC
@@ -203,6 +237,11 @@ public class MainController {
             lastNameTextField.setText("");
         } else {
             // deselect
+            firstNameTextField.setText("");
+            firstNameTextField.setPromptText("");
+            lastNameTextField.setText("");
+            tempPhoneList.clear();
+            phoneListView.refresh();
             setInitialScenario();
         }
     }
@@ -229,9 +268,10 @@ public class MainController {
 
     private void usedEditButton() {
         if (selectedContact != null) {
+            rightPanel.setVisible(true);
             if (editButton.isSelected()) {
                 // SELECTED LOGIC
-                tempPhoneList = selectedContact.getPhoneList();
+                tempPhoneList = new ArrayList<>(selectedContact.getPhoneList());
 
                 firstNameTextField.setEditable(true);
                 lastNameTextField.setEditable(true);
@@ -257,10 +297,8 @@ public class MainController {
 
     private void usedConfirmEditButton() {
         // LOGIC
-        System.out.println("confirm edit pushed");
         selectedContact.setFirstName(firstNameTextField.getText());
         selectedContact.setLastName(lastNameTextField.getText());
-        selectedContact.setPhoneList(new ArrayList<>(tempPhoneList));
         tempPhoneList.clear();
 
         // VISUALS
@@ -269,42 +307,52 @@ public class MainController {
         setInitialScenario();
     }
 
+    private void usedDeleteButton(TableColumn deleteCol) {
+        rightPanel.setVisible(true);
 
-    private void usedDeleteButton() {
-        if (selectedContact != null) {
-            if (deleteButton.isSelected()) {
-                // SELECTED LOGIC
-                addButton.setDisable(true);
-                editButton.setDisable(true);
-                confirmDeleteButton.setVisible((true));
-            }
+        if (deleteButton.isSelected()) {
+            // SELECTED LOGIC
+            confirmDeleteButton.setVisible(true);
+            deleteCol.setVisible(true);
+
+            addButton.setDisable(true);
+            editButton.setDisable(true);
+
+            addPhoneButton.setDisable(true);
+            deletePhoneButton.setDisable(true);
         } else {
-            deleteButton.setSelected(false);
-        }
-        // DE-SELECTED LOGIC
-        if (!deleteButton.isSelected()) {
-            addButton.setDisable(false);
-            editButton.setDisable(false);
+            // DE-SELECTED LOGIC
             confirmDeleteButton.setVisible(false);
+            deleteCol.setVisible(false);
+
+            for (Contact item : contactsTable.getItems()) {
+                if (item.isToBeDeleted()) {
+                    item.setToBeDeleted(false);
+                }
+            }
+            addPhoneButton.setDisable(false);
+            deleteButton.setSelected(false);
+            deletePhoneButton.setDisable(false);
+            setInitialScenario();
         }
     }
 
     private void usedConfirmDeleteButton() {
-        if (selectedContact != null) {
-            // LOGIC
-            allContacts.remove(selectedContact);
-            filteredContactList.remove(selectedContact);
-            selectedContact.getPhoneList().clear();
+        // LOGIC
+        List<Contact> toBeDeletedList = new ArrayList<>();
 
-            phoneListView.setItems(FXCollections.observableList(selectedContact.getPhoneList()));
-            selectedContact = null;
-            contactsTable.refresh();
-            contactsTable.getSelectionModel().clearSelection();
-
-            // VISUAL
-            firstNameTextField.setText("");
-            lastNameTextField.setText("");
+        for (Contact item : contactsTable.getItems()) {
+            if (item.isToBeDeleted()) {
+                toBeDeletedList.add(item);
+            }
         }
+        allContacts.removeAll(toBeDeletedList);
+        filteredContactList.removeAll(toBeDeletedList);
+
+        // VISUAL
+        firstNameTextField.setText("");
+        lastNameTextField.setText("");
+        phoneListView.getItems().clear();
     }
 
 
@@ -319,9 +367,10 @@ public class MainController {
         //VISIBLE
         confirmAddButton.setVisible(false);
         confirmEditButton.setVisible(false);
-        confirmDeleteButton.setVisible(false);
+
         addPhoneTextField.setVisible(false);
         addPhoneTextField.setText("");
+
 
         // EDITABLE
         firstNameTextField.setEditable(false);
@@ -330,8 +379,11 @@ public class MainController {
     }
 
     private void setSelectedContact() {
+        addPhoneTextField.setVisible(false);
         selectedContact = contactsTable.getSelectionModel().getSelectedItem();
         if (selectedContact != null) {
+
+            rightPanel.setVisible(true);
             firstNameTextField.setText(selectedContact.getFirstName());
             lastNameTextField.setText(selectedContact.getLastName());
             phoneListView.setItems(FXCollections.observableList(selectedContact.getPhoneList()));
@@ -371,6 +423,27 @@ public class MainController {
                         || d.getPhoneList().contains(searchWord))
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+
+    private EventHandler<KeyEvent> limitMaxInput(TextField textField, int maxInputChars, String forbiddenChars) {
+        return t -> {
+            if (textField.getText().length() > maxInputChars) {
+                int pos = textField.getCaretPosition();
+                textField.setText(textField.getText(0, maxInputChars));
+                textField.positionCaret(pos); //To reposition caret since setText sets it at the beginning by default
+            } else {
+                for (int i = 0; i < forbiddenChars.length(); i++) {
+                    if (textField.getText().contains(String.valueOf(forbiddenChars.charAt(i)))) {
+                        String filteredString = textField.getText().replace(String.valueOf(forbiddenChars.charAt(i)), "");
+                        int pos = textField.getCaretPosition();
+                        textField.setText(filteredString);
+                        textField.positionCaret(pos); //To reposition caret since setText sets it at the beginning by default
+                    }
+                }
+            }
+        };
+
     }
 
 
