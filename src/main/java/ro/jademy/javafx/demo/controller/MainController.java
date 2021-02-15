@@ -41,11 +41,23 @@ public class MainController {
     @FXML
     Button deletePhoneButton;
 
-    @FXML
-    Button saveButton;
+
 
     @FXML
     VBox rightPanel;
+
+    //// MENU
+    @FXML
+    MenuItem newButtonMenu;
+
+    @FXML
+    MenuItem openButtonMenu;
+
+    @FXML
+    MenuItem saveButtonMenu;
+
+    @FXML
+    MenuItem saveAsButtonMenu;
 
 
     @FXML
@@ -62,13 +74,16 @@ public class MainController {
     @FXML
     ListView<String> phoneListView;
 
+
+
     /// CHOOSE DIFFERENT input files
     //  private final ObservableList<Contact> allContacts = FXCollections.observableList(SQLDatabase.getAllQuestionsFromDB());
-    private final ObservableList<Contact> allContacts = FXCollections.observableList(CSVDatabase.getCSV());
+    private ObservableList<Contact> allContacts = FXCollections.observableList(new ArrayList<>());
     private Contact selectedContact;
 
     List<String> tempPhoneList = new ArrayList<>();
-    private ObservableList<Contact> filteredContactList = allContacts;
+    private ObservableList<Contact> filteredContactList = FXCollections.observableList(new ArrayList<>());
+
 
     // INPUT Limiting Filter
     int maxInputCharLimit = 40;
@@ -77,8 +92,6 @@ public class MainController {
 
     @FXML
     private void initialize() throws IOException {
-        rightPanel.setVisible(false);
-
 
         // SET TABLE-VIEW
         contactsTable.setEditable(true);
@@ -106,12 +119,10 @@ public class MainController {
             setSelectedContact();
         });
 
-
         // searchTextField logic
         searchTextField.setPromptText("Search here...");
         searchTextField.setOnKeyReleased(keyEvent -> doFilterList(searchTextField.getText()));
         phoneListView.setCellFactory(TextFieldListCell.forListView());
-
 
         // LIMITING INPUT
         firstNameTextField.setOnKeyTyped(limitMaxInput(firstNameTextField, maxInputCharLimit, forbiddenChars));
@@ -119,15 +130,47 @@ public class MainController {
         addPhoneTextField.setOnKeyTyped(limitMaxInput(addPhoneTextField, maxInputCharLimit, forbiddenChars));
         searchTextField.setOnKeyTyped(limitMaxInput(searchTextField, maxInputCharLimit, forbiddenChars));
 
+        // Disable everything untill File is NEW or OPENED
+        searchTextField.setDisable(true);
+        contactsTable.setDisable(true);
+        addButton.setDisable(true);
+        editButton.setDisable(true);
+        deleteButton.setDisable(true);
+        rightPanel.setVisible(false);
 
-//////////////////////////////////////////////////////////////////////////////////
-        /*             HANDLERS for BUTTONS
-         *///////////////////////////////////////////////////////////////////////
-
-        saveButton.setOnAction(actionEvent -> {
-            usedSaveButton(allContacts);
+        ////    MENU ITEMS
+        newButtonMenu.setOnAction(actionEvent -> {
+            CSVDatabase.newMenuButtonUsed();
+            allContacts = FXCollections.observableList(new ArrayList<>());
+            filteredContactList = allContacts;
+            contactsTable.setItems(filteredContactList);
+            setInitialScenario();
+            firstNameTextField.setText("");
+            lastNameTextField.setText("");
+            phoneListView.setItems(null);
         });
 
+        openButtonMenu.setOnAction(actionEvent -> {
+            List<Contact> tempContactList = CSVDatabase.readCSV(CSVDatabase.chooseCSVFile());
+            if(tempContactList != null) {
+                allContacts = FXCollections.observableList(tempContactList);
+                filteredContactList = allContacts;
+                contactsTable.setItems(filteredContactList);
+                setInitialScenario();
+            }
+        });
+
+        saveButtonMenu.setOnAction(actionEvent -> {
+            CSVDatabase.saveContactsToChosenCSV(allContacts);
+        });
+
+        saveAsButtonMenu.setOnAction(actionEvent -> {
+            CSVDatabase.saveASNewCSV(allContacts);
+        });
+
+        //////////////////////////////////////////////////////////////////////////
+        /*             HANDLERS for BUTTONS
+         *///////////////////////////////////////////////////////////////////////
 
         addButton.setOnAction(actionEvent -> {
             usedAddButton();
@@ -135,7 +178,6 @@ public class MainController {
         confirmAddButton.setOnAction(actionEvent -> {
             usedConfirmAddButton();
         });
-
 
         editButton.setOnAction(actionEvent -> {
             usedEditButton();
@@ -148,13 +190,12 @@ public class MainController {
             usedDeleteButton(deleteCol);
         });
 
-
         confirmDeleteButton.setOnAction(actionEvent -> {
             usedConfirmDeleteButton();
         });
 
 
-        ///// PHONE ADD DELETE
+        ///// PHONE ADD / DELETE
         addPhoneButton.setOnAction(actionEvent -> {
             if (addButton.isSelected()
                     || editButton.isSelected()
@@ -173,13 +214,8 @@ public class MainController {
     }
 
     /////////////////////////////////////////////////////////////////////////////////
-
-
-    private void usedSaveButton(List<Contact> allContacts) {
-        // TODO save to DB eventually ?
-        System.out.println("Trying to save on contacts");
-        CSVDatabase.saveToCSV(allContacts);
-    }
+    //*              METHODS
+    ////////////////////////////////////////////////////////////////////////////////
 
     private void usedAddPhoneTextField() {
         String newNumber = addPhoneTextField.getText();
@@ -202,7 +238,6 @@ public class MainController {
                 selectedContact.getPhoneList().remove(phoneListView.getSelectionModel().getSelectedItem());
                 phoneListView.refresh();
             } else if (addButton.isSelected()) {
-                //phoneListView.setItems(FXCollections.observableList(tempPhoneList));
                 tempPhoneList.remove(phoneListView.getSelectionModel().getSelectedItem());
                 phoneListView.refresh();
             }
@@ -371,7 +406,6 @@ public class MainController {
         addPhoneTextField.setVisible(false);
         addPhoneTextField.setText("");
 
-
         // EDITABLE
         firstNameTextField.setEditable(false);
         lastNameTextField.setEditable(false);
@@ -382,7 +416,6 @@ public class MainController {
         addPhoneTextField.setVisible(false);
         selectedContact = contactsTable.getSelectionModel().getSelectedItem();
         if (selectedContact != null) {
-
             rightPanel.setVisible(true);
             firstNameTextField.setText(selectedContact.getFirstName());
             lastNameTextField.setText(selectedContact.getLastName());
